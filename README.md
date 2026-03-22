@@ -3,6 +3,7 @@
 Invisible canary tokens for LLM prompt leakage detection.
 
 [![npm version](https://img.shields.io/npm/v/llm-canary.svg)](https://www.npmjs.com/package/llm-canary)
+[![npm downloads](https://img.shields.io/npm/dt/llm-canary.svg)](https://www.npmjs.com/package/llm-canary)
 [![license](https://img.shields.io/npm/l/llm-canary.svg)](https://github.com/SiluPanda/llm-canary/blob/master/LICENSE)
 [![node](https://img.shields.io/node/v/llm-canary.svg)](https://nodejs.org)
 
