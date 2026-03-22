@@ -2,7 +2,7 @@
 
 ## Phase 1: Project Scaffolding and Type Definitions
 
-- [ ] **Install dev dependencies** — Add `typescript`, `vitest`, and `eslint` as dev dependencies in `package.json`. Ensure `vitest` config works with the existing `tsconfig.json`. | Status: not_done
+- [x] **Install dev dependencies** — Add `typescript`, `vitest`, and `eslint` as dev dependencies in `package.json`. Ensure `vitest` config works with the existing `tsconfig.json`. | Status: done
 
 - [ ] **Add CLI bin entry to package.json** — Add `"bin": { "llm-canary": "dist/cli.js" }` to `package.json` so the CLI is available as an executable after global install or via `npx`. | Status: not_done
 
@@ -12,27 +12,27 @@
 
 ## Phase 2: Payload Serialization (`src/payload.ts`)
 
-- [ ] **Implement payload serialization (encode)** — Implement a function that takes a payload string and produces a serialized byte sequence: 2-byte magic header (`0xCA 0x1A`), 1-byte length, N payload bytes (UTF-8), and 1-byte XOR checksum. Use `TextEncoder` for UTF-8 conversion. | Status: not_done
+- [x] **Implement payload serialization (encode)** — Implement a function that takes a payload string and produces a serialized byte sequence: 2-byte magic header (`0xCA 0x1A`), 1-byte length, N payload bytes (UTF-8), and 1-byte XOR checksum. Use `TextEncoder` for UTF-8 conversion. | Status: done
 
-- [ ] **Implement payload deserialization (decode)** — Implement a function that takes a serialized byte sequence, verifies the magic header, reads the length byte, extracts the payload bytes, verifies the XOR checksum, and returns the decoded payload string plus a `checksumValid` flag. Use `TextDecoder` for UTF-8 conversion. | Status: not_done
+- [x] **Implement payload deserialization (decode)** — Implement a function that takes a serialized byte sequence, verifies the magic header, reads the length byte, extracts the payload bytes, verifies the XOR checksum, and returns the decoded payload string plus a `checksumValid` flag. Use `TextDecoder` for UTF-8 conversion. | Status: done
 
 - [ ] **Enforce payload size constraints** — Validate that the payload is at least 1 byte and at most 255 bytes when encoded as UTF-8. Throw a descriptive error for empty payloads and payloads exceeding 255 bytes. | Status: not_done
 
-- [ ] **Implement byte-to-bit conversion utilities** — Implement helper functions for converting between byte arrays and bit arrays (MSB first). These are shared by all encoders. | Status: not_done
+- [x] **Implement byte-to-bit conversion utilities** — Implement helper functions for converting between byte arrays and bit arrays (MSB first). These are shared by all encoders. | Status: done
 
 - [ ] **Write payload serialization tests (`src/__tests__/payload.test.ts`)** — Test round-trip serialize/deserialize for various payload sizes (1 byte, 16 bytes, 36-byte UUID, 255 bytes max). Test edge cases: empty string rejection, 256-byte payload rejection, non-ASCII UTF-8 multibyte payloads, special characters. Test checksum verification (valid and corrupted). Test magic header validation (missing/wrong header). | Status: not_done
 
 ## Phase 3: UUID Generation (`src/token.ts`)
 
-- [ ] **Implement UUID v4 auto-generation** — Implement UUID v4 generation using `crypto.randomUUID()` (Node.js 19+) with a fallback to `crypto.getRandomValues()` for Node.js 18. Return a standard UUID string (36 characters, lowercase hex with hyphens). | Status: not_done
+- [x] **Implement UUID v4 auto-generation** — Implement UUID v4 generation using `crypto.randomUUID()` (Node.js 19+) with a fallback to `crypto.getRandomValues()` for Node.js 18. Return a standard UUID string (36 characters, lowercase hex with hyphens). | Status: done
 
 - [ ] **Implement token creation logic** — Implement the `generateToken` function that creates a `CanaryToken` object with `type`, `payload`, `encoded` (or `null` for homoglyph), and `createdAt` (ISO 8601 timestamp). Dispatch to the appropriate encoder based on type. | Status: not_done
 
 ## Phase 4: Zero-Width Encoder (`src/encoders/zero-width.ts`)
 
-- [ ] **Implement zero-width character encoding** — Encode a serialized payload byte array into a string of zero-width Unicode characters: bit `0` maps to U+200B (ZWSP), bit `1` maps to U+200C (ZWNJ), and U+200D (ZWJ) is used as a byte separator between each 8-character group. Use `String.fromCodePoint()` for character generation. | Status: not_done
+- [x] **Implement zero-width character encoding** — Encode a serialized payload byte array into a string of zero-width Unicode characters: bit `0` maps to U+200B (ZWSP), bit `1` maps to U+200C (ZWNJ), and U+200D (ZWJ) is used as a byte separator between each 8-character group. Use `String.fromCodePoint()` for character generation. | Status: done
 
-- [ ] **Implement zero-width character decoding** — Scan input text for sequences of U+200B, U+200C, and U+200D characters. Split on U+200D to recover byte groups. Map U+200B to `0` and U+200C to `1` to reconstruct each byte. Verify magic header and checksum. Return decoded payload, confidence level, and position information. | Status: not_done
+- [x] **Implement zero-width character decoding** — Scan input text for sequences of U+200B, U+200C, and U+200D characters. Split on U+200D to recover byte groups. Map U+200B to `0` and U+200C to `1` to reconstruct each byte. Verify magic header and checksum. Return decoded payload, confidence level, and position information. | Status: done
 
 - [ ] **Handle multiple zero-width sequences in text** — When scanning for zero-width sequences, find all contiguous runs of zero-width characters in the text (there may be multiple canary tokens or fragments). Attempt to decode each run independently. | Status: not_done
 
@@ -40,13 +40,13 @@
 
 ## Phase 5: Homoglyph Encoder (`src/encoders/homoglyph.ts`)
 
-- [ ] **Define the homoglyph lookup map** — Create a bidirectional map of Latin characters to their Cyrillic homoglyph equivalents, covering all 19 pairs listed in the spec (both lowercase and uppercase). Include reverse lookup (homoglyph codepoint to Latin original). | Status: not_done
+- [x] **Define the homoglyph lookup map** — Create a bidirectional map of Latin characters to their Cyrillic homoglyph equivalents, covering all 19 pairs listed in the spec (both lowercase and uppercase). Include reverse lookup (homoglyph codepoint to Latin original). | Status: done
 
-- [ ] **Implement homoglyph encoding** — Given a serialized payload bit sequence and a target text, scan the text for characters that have homoglyph equivalents to build an ordered list of substitutable positions. For each bit: if `1`, replace the character with its homoglyph; if `0`, leave the Latin original. Return error if the prompt has insufficient substitutable characters for the payload. | Status: not_done
+- [x] **Implement homoglyph encoding** — Given a serialized payload bit sequence and a target text, scan the text for characters that have homoglyph equivalents to build an ordered list of substitutable positions. For each bit: if `1`, replace the character with its homoglyph; if `0`, leave the Latin original. Return error if the prompt has insufficient substitutable characters for the payload. | Status: done
 
 - [ ] **Implement homoglyph decoding** — Scan input text for characters that are either Latin originals or their homoglyph equivalents. Build the substitutable position list. For each position, record `1` if homoglyph, `0` if Latin original. Reconstruct the byte sequence, verify magic header and checksum. Include the `latinTextRatio` check: skip homoglyph detection if fewer than 70% of alphabetic characters are Latin. | Status: not_done
 
-- [ ] **Handle capacity errors for homoglyph encoding** — Calculate the number of substitutable positions in the prompt. If `substitutable_positions < (payload_bytes + 4) * 8` (payload + header/length/checksum, 8 bits each), throw a descriptive error explaining the prompt is too short or has too few substitutable characters. | Status: not_done
+- [x] **Handle capacity errors for homoglyph encoding** — Calculate the number of substitutable positions in the prompt. If `substitutable_positions < (payload_bytes + 4) * 8` (payload + header/length/checksum, 8 bits each), throw a descriptive error explaining the prompt is too short or has too few substitutable characters. | Status: done
 
 - [ ] **Write homoglyph encoder/decoder tests (`src/__tests__/encoders/homoglyph.test.ts`)** — Test round-trip encode/decode for various payloads. Test that encoded text looks visually identical (same string length, same visible appearance). Test capacity error when prompt has insufficient substitutable characters. Test that the `latinTextRatio` check skips detection for predominantly Cyrillic text. Test the full homoglyph map (all 19 pairs). Test behavior with Unicode normalization (NFC and NFKC). | Status: not_done
 
@@ -80,7 +80,7 @@
 
 ## Phase 9: Generate API (`src/index.ts` via `src/token.ts`)
 
-- [ ] **Implement `generate()` function** — Implement the public `generate(options?: GenerateOptions)` function. Auto-generate UUID v4 payload when no payload is provided. Default type to `'zero-width'`. Validate payload size constraints. Dispatch to the appropriate encoder to produce the `encoded` field (`null` for homoglyph type since encoding requires target text). Return a `CanaryToken` object. | Status: not_done
+- [x] **Implement `generate()` function** — Implement the public `generate(options?: GenerateOptions)` function. Auto-generate UUID v4 payload when no payload is provided. Default type to `'zero-width'`. Validate payload size constraints. Dispatch to the appropriate encoder to produce the `encoded` field (`null` for homoglyph type since encoding requires target text). Return a `CanaryToken` object. | Status: done
 
 - [ ] **Handle custom marker type in `generate()`** — When `type` is `'custom'`, require `custom` config with `encode`, `decode`, and `name` fields. Call `custom.encode(payload)` to produce the `encoded` field. Throw a descriptive error if `custom` config is missing. | Status: not_done
 
@@ -88,15 +88,15 @@
 
 ## Phase 10: Embed API (`src/embed.ts`)
 
-- [ ] **Implement `embed()` function with `start` position** — Insert the canary token's encoded string at the very beginning of the system prompt, before the first visible character. | Status: not_done
+- [x] **Implement `embed()` function with `start` position** — Insert the canary token's encoded string at the very beginning of the system prompt, before the first visible character. | Status: done
 
-- [ ] **Implement `embed()` with `end` position** — Insert the canary token's encoded string at the very end of the system prompt, after the last visible character. | Status: not_done
+- [x] **Implement `embed()` with `end` position** — Insert the canary token's encoded string at the very end of the system prompt, after the last visible character. | Status: done
 
-- [ ] **Implement `embed()` with `after-first-sentence` position** — Detect the first sentence boundary (`.`, `!`, or `?` followed by whitespace) and insert the canary token after it. Handle edge cases: prompt with no sentence-ending punctuation, prompt with only one sentence. | Status: not_done
+- [x] **Implement `embed()` with `after-first-sentence` position** — Detect the first sentence boundary (`.`, `!`, or `?` followed by whitespace) and insert the canary token after it. Handle edge cases: prompt with no sentence-ending punctuation, prompt with only one sentence. | Status: done
 
-- [ ] **Implement `embed()` with `before-last-sentence` position** — Detect the last sentence in the prompt and insert the canary token before it. Handle edge cases: single-sentence prompts. | Status: not_done
+- [x] **Implement `embed()` with `before-last-sentence` position** — Detect the last sentence in the prompt and insert the canary token before it. Handle edge cases: single-sentence prompts. | Status: done
 
-- [ ] **Implement `embed()` with `random` position** — Insert the canary token at a deterministically random position within the prompt. The position is seeded by a hash of the payload so it is reproducible given the same payload and prompt. | Status: not_done
+- [x] **Implement `embed()` with `random` position** — Insert the canary token at a deterministically random position within the prompt. The position is seeded by a hash of the payload so it is reproducible given the same payload and prompt. | Status: done
 
 - [ ] **Implement `embed()` with `multiple` position** — Insert copies of the canary token at multiple positions (default: `['start', 'end']`). Accept a `positions` array in `EmbedOptions`. Call the position-specific insertion logic for each position. | Status: not_done
 
@@ -104,7 +104,7 @@
 
 - [ ] **Implement type-dependent default positions** — When no position is specified: `'end'` for zero-width and whitespace types, `'after-first-sentence'` for semantic, `'start'` for homoglyph. | Status: not_done
 
-- [ ] **Handle homoglyph embedding specially** — For homoglyph type, the embedding modifies the prompt characters in-place (substitution, not insertion). The `embed()` function must call the homoglyph encoder with both the payload and the prompt text. The returned text has the same length but with some characters replaced. | Status: not_done
+- [x] **Handle homoglyph embedding specially** — For homoglyph type, the embedding modifies the prompt characters in-place (substitution, not insertion). The `embed()` function must call the homoglyph encoder with both the payload and the prompt text. The returned text has the same length but with some characters replaced. | Status: done
 
 - [ ] **Handle semantic marker embedding specially** — For semantic type, the embedding inserts visible marker sentences. The `embed()` function must handle sentence-level insertion (adding sentences at the appropriate position, with proper spacing and punctuation). | Status: not_done
 
@@ -112,13 +112,13 @@
 
 ## Phase 11: Detect API (`src/detect.ts`)
 
-- [ ] **Implement `detect()` function** — Implement the public `detect(text: string, options?: DetectOptions)` function. Run all registered decoders (or the subset specified by `options.types`) against the input text. Collect all `DetectedToken` results. Filter by `minConfidence` (default `'medium'`). Measure scan duration using `performance.now()`. Return a `DetectionResult` with `found`, `tokens`, `durationMs`, and `scannedTypes`. | Status: not_done
+- [x] **Implement `detect()` function** — Implement the public `detect(text: string, options?: DetectOptions)` function. Run all registered decoders (or the subset specified by `options.types`) against the input text. Collect all `DetectedToken` results. Filter by `minConfidence` (default `'medium'`). Measure scan duration using `performance.now()`. Return a `DetectionResult` with `found`, `tokens`, `durationMs`, and `scannedTypes`. | Status: done
 
-- [ ] **Implement confidence level assignment** — Assign `'high'` when full token recovered with valid header and checksum. Assign `'medium'` when header is valid but checksum fails (partial recovery). Assign `'low'` for pattern matches that could be coincidental (e.g., partial semantic template match, short zero-width sequences). | Status: not_done
+- [x] **Implement confidence level assignment** — Assign `'high'` when full token recovered with valid header and checksum. Assign `'medium'` when header is valid but checksum fails (partial recovery). Assign `'low'` for pattern matches that could be coincidental (e.g., partial semantic template match, short zero-width sequences). | Status: done
 
-- [ ] **Implement partial token recovery** — When the magic header is found but the checksum fails, still report the decoded payload with `medium` confidence and `checksumValid: false`. When multiple copies of a token were embedded, attempt recovery from each copy independently and report the highest-confidence result. | Status: not_done
+- [x] **Implement partial token recovery** — When the magic header is found but the checksum fails, still report the decoded payload with `medium` confidence and `checksumValid: false`. When multiple copies of a token were embedded, attempt recovery from each copy independently and report the highest-confidence result. | Status: done
 
-- [ ] **Implement type-restricted detection** — When `options.types` is provided, only run the specified decoders. This enables faster scanning when the caller knows which token type was used. | Status: not_done
+- [x] **Implement type-restricted detection** — When `options.types` is provided, only run the specified decoders. This enables faster scanning when the caller knows which token type was used. | Status: done
 
 - [ ] **Implement custom decoder support in detect** — When `options.customDecoders` is provided, include those custom decoders in the scan alongside built-in decoders. Call each custom decoder's `decode(text)` function. | Status: not_done
 
@@ -126,19 +126,19 @@
 
 ## Phase 12: Verify API (`src/verify.ts`)
 
-- [ ] **Implement `verify()` function** — Implement the public `verify(text: string, token: CanaryToken, options?: VerifyOptions)` function. Call `detect()` internally, then check if any detected token's payload matches the provided token's payload. Return `true` if a match is found at or above the specified `minConfidence` level (default `'medium'`). Return `false` otherwise. | Status: not_done
+- [x] **Implement `verify()` function** — Implement the public `verify(text: string, token: CanaryToken, options?: VerifyOptions)` function. Call `detect()` internally, then check if any detected token's payload matches the provided token's payload. Return `true` if a match is found at or above the specified `minConfidence` level (default `'medium'`). Return `false` otherwise. | Status: done
 
 - [ ] **Write verify tests (`src/__tests__/verify.test.ts`)** — Test `verify()` returns `true` when the specific token is present. Test returns `false` when the token is absent. Test returns `true` when multiple tokens are present and the specified one is among them. Test `minConfidence` filtering (e.g., returns `false` when match is `low` confidence but `minConfidence` is `medium`). | Status: not_done
 
 ## Phase 13: Canary Factory (`src/canary.ts`)
 
-- [ ] **Implement `createCanary()` factory** — Implement the public `createCanary(config: CanaryConfig)` function. Create a `CanaryToken` using `generate()` with the config's type, payload, and custom options. Return a `Canary` instance with `token`, `embed()`, `detect()`, and `verify()` methods. The returned methods use the config's defaults (position, minConfidence, etc.) but allow per-call overrides. | Status: not_done
+- [x] **Implement `createCanary()` factory** — Implement the public `createCanary(config: CanaryConfig)` function. Create a `CanaryToken` using `generate()` with the config's type, payload, and custom options. Return a `Canary` instance with `token`, `embed()`, `detect()`, and `verify()` methods. The returned methods use the config's defaults (position, minConfidence, etc.) but allow per-call overrides. | Status: done
 
 - [ ] **Write factory tests (`src/__tests__/canary.test.ts`)** — Test `createCanary()` with various configs. Test `canary.embed()` uses the configured defaults. Test `canary.detect()` scans for all types by default. Test `canary.verify()` checks for the specific token. Test end-to-end workflow: `createCanary()` -> `canary.embed()` -> `canary.detect()` -> `canary.verify()`. Test per-call option overrides. | Status: not_done
 
 ## Phase 14: Public API Exports (`src/index.ts`)
 
-- [ ] **Wire up all public exports in `src/index.ts`** — Export `generate`, `embed`, `detect`, `verify`, and `createCanary` from `src/index.ts`. Export all public type definitions from `src/types.ts`. Ensure the module's public API surface matches the spec exactly. | Status: not_done
+- [x] **Wire up all public exports in `src/index.ts`** — Export `generate`, `embed`, `detect`, `verify`, and `createCanary` from `src/index.ts`. Export all public type definitions from `src/types.ts`. Ensure the module's public API surface matches the spec exactly. | Status: done
 
 ## Phase 15: CLI Implementation (`src/cli.ts`)
 
