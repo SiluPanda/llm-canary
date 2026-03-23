@@ -66,6 +66,41 @@ export function detect(text: string, options?: DetectOptions): DetectionResult {
     }
   }
 
+  if (enabledTypes.includes('whitespace')) {
+    const lines = text.split('\n')
+    const bits: number[] = []
+    for (const line of lines) {
+      const trailingMatch = line.match(/ +$/)
+      if (trailingMatch) {
+        bits.push(trailingMatch[0].length >= 2 ? 1 : 0)
+      }
+    }
+    const byteCount = Math.floor(bits.length / 8)
+    if (byteCount > 0) {
+      const wsBytes = new Uint8Array(byteCount)
+      for (let i = 0; i < byteCount; i++) {
+        let byte = 0
+        for (let b = 0; b < 8; b++) {
+          byte = (byte << 1) | bits[i * 8 + b]
+        }
+        wsBytes[i] = byte
+      }
+      const decoded = decodePacket(wsBytes)
+      if (decoded) {
+        const confidence: Confidence = decoded.checksumValid ? 'high' : 'medium'
+        if (meetsMinConfidence(confidence, minConfidence)) {
+          tokens.push({
+            type: 'whitespace',
+            payload: decoded.payload,
+            confidence,
+            checksumValid: decoded.checksumValid,
+            position: { start: 0, end: text.length },
+          })
+        }
+      }
+    }
+  }
+
   return {
     found: tokens.length > 0,
     tokens,
