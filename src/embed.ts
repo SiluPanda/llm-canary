@@ -14,7 +14,7 @@ function insertAt(prompt: string, marker: string, position: EmbedOptions['positi
   if (pos === 'after-first-sentence') {
     const match = prompt.match(/[.!?]\s/)
     if (match && match.index !== undefined) {
-      const idx = match.index + 1
+      const idx = match.index + match[0].length
       return prompt.slice(0, idx) + marker + prompt.slice(idx)
     }
     return prompt + marker

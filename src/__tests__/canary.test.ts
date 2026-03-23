@@ -3,6 +3,7 @@ import { generate } from '../generate'
 import { embed } from '../embed'
 import { detect } from '../detect'
 import { verify, createCanary } from '../canary'
+import { encodePacket } from '../codec'
 
 const ZW_SPACE = '\u200B'
 const ZW_NON_JOINER = '\u200C'
@@ -167,5 +168,40 @@ describe('createCanary()', () => {
       'Every character type must be handled properly to ensure correctness.'
     const embedded = canary.embed(prompt)
     expect(canary.verify(embedded)).toBe(true)
+  })
+})
+
+describe('whitespace roundtrip', () => {
+  it('should roundtrip whitespace canary', () => {
+    const token = generate({ type: 'whitespace', payload: 'test-ws' })
+    // Need enough lines for the bits (packet is ~12 bytes = 96 bits = 96 lines)
+    const lines = Array.from({ length: 100 }, (_, i) => `Line ${i}`)
+    const prompt = lines.join('\n')
+    const embedded = embed(prompt, token)
+    const result = detect(embedded, { types: ['whitespace'] })
+    expect(result.found).toBe(true)
+    expect(result.tokens[0].payload).toBe('test-ws')
+    expect(result.tokens[0].checksumValid).toBe(true)
+  })
+})
+
+describe('after-first-sentence position', () => {
+  it('should insert after-first-sentence including the trailing space', () => {
+    const token = generate({ type: 'zero-width', payload: 'pos-test' })
+    const prompt = 'First sentence. Second sentence.'
+    const embedded = embed(prompt, token, { position: 'after-first-sentence' })
+    // Should insert AFTER "First sentence. " (including space), not between "." and " "
+    expect(embedded.indexOf('First sentence. ')).toBe(0)
+    // The visible text after the marker should start with "Second"
+    const visibleText = embedded.replace(/[\u200B\u200C\u200D]/g, '')
+    expect(visibleText).toBe('First sentence. Second sentence.')
+  })
+})
+
+describe('encodePacket() payload size limit', () => {
+  it('should throw when payload exceeds 255 bytes', () => {
+    expect(() => {
+      encodePacket('x'.repeat(256))
+    }).toThrow('Payload too large')
   })
 })

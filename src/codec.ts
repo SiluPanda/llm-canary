@@ -4,6 +4,9 @@ const MAGIC = [0xca, 0x1a]
 export function encodePacket(payload: string): Uint8Array {
   const encoder = new TextEncoder()
   const payloadBytes = encoder.encode(payload)
+  if (payloadBytes.length > 255) {
+    throw new Error(`Payload too large: ${payloadBytes.length} bytes (max 255)`)
+  }
   let checksum = 0
   for (const b of payloadBytes) {
     checksum ^= b
