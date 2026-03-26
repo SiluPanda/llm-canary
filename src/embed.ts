@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto'
 import { encodeZeroWidth } from './encoders/zero-width'
 import { encodeHomoglyph } from './encoders/homoglyph'
 import { encodePacket } from './codec'
@@ -30,7 +31,7 @@ function insertAt(prompt: string, marker: string, position: EmbedOptions['positi
     return marker + prompt
   }
   if (pos === 'random') {
-    const idx = Math.floor(Math.random() * (prompt.length + 1))
+    const idx = randomInt(0, prompt.length + 1)
     return prompt.slice(0, idx) + marker + prompt.slice(idx)
   }
   return prompt + marker
@@ -54,6 +55,9 @@ export function embed(prompt: string, token: CanaryToken, options?: EmbedOptions
       }
     }
     const lines = prompt.split('\n')
+    if (lines.length < bits.length) {
+      throw new Error(`Insufficient whitespace capacity: need ${bits.length} lines, found ${lines.length}`)
+    }
     let bitIndex = 0
     const encodedLines = lines.map(line => {
       if (bitIndex >= bits.length) return line
