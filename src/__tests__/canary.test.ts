@@ -198,6 +198,42 @@ describe('after-first-sentence position', () => {
   })
 })
 
+describe('random position uses crypto.randomInt', () => {
+  it('inserts token at a valid position within the prompt', () => {
+    const token = generate({ payload: 'rng-test' })
+    const prompt = 'Hello, world!'
+    const embedded = embed(prompt, token, { position: 'random' })
+    // Should contain the original prompt text (sans zero-width chars)
+    const visibleText = embedded.replace(/[\u200B\u200C\u200D]/g, '')
+    expect(visibleText).toBe(prompt)
+    // Should contain zero-width chars (the canary)
+    expect(hasZeroWidthChars(embedded)).toBe(true)
+  })
+
+  it('produces valid roundtrip with random position', () => {
+    const token = generate({ payload: 'crypto-pos' })
+    const prompt = 'A sentence here. Another sentence there.'
+    const embedded = embed(prompt, token, { position: 'random' })
+    expect(verify(embedded, token)).toBe(true)
+  })
+})
+
+describe('whitespace capacity validation', () => {
+  it('throws when prompt has fewer lines than bits needed', () => {
+    const token = generate({ type: 'whitespace', payload: 'test-ws' })
+    // payload 'test-ws' -> packet ~12 bytes -> 96 bits needed, but only 3 lines
+    const prompt = 'Line 1\nLine 2\nLine 3'
+    expect(() => embed(prompt, token)).toThrow('Insufficient whitespace capacity')
+  })
+
+  it('includes needed and found counts in error message', () => {
+    const token = generate({ type: 'whitespace', payload: 'ab' })
+    // payload 'ab' -> packet = 6 bytes -> 48 bits needed, but only 5 lines
+    const prompt = 'L0\nL1\nL2\nL3\nL4'
+    expect(() => embed(prompt, token)).toThrow(/need \d+ lines, found 5/)
+  })
+})
+
 describe('encodePacket() payload size limit', () => {
   it('should throw when payload exceeds 255 bytes', () => {
     expect(() => {
